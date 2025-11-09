@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "react-share": "^5.1.0",
+    "sweetalert2": "^11.12.2"
+  }
+}
