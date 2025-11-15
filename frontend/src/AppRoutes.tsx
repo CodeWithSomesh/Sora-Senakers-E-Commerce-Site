@@ -16,6 +16,8 @@ import KidsProductPage from "./pages/KidsProductPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import UpdateProductDetails from "./forms/manage-shop-form/UpdateProductDetails";
 import PaymentPage from "./pages/PaymentPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicy";
+import TermsOfServicePage from "./pages/TermsOfService";
 
 const AppRoutes = () => {
     return (
@@ -83,7 +85,22 @@ const AppRoutes = () => {
                 }
             />
 
-
+            <Route 
+                path="/privacyPolicy" 
+                element={
+                    <Layout homePage={false}>
+                        <PrivacyPolicyPage />
+                    </Layout>
+                }
+            />
+            <Route 
+                path="/termsOfService" 
+                element={
+                    <Layout homePage={false}>
+                        <TermsOfServicePage />
+                    </Layout>
+                }
+            />
 
             <Route element={<ProtectedRoute/>}>
                 <Route 

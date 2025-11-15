@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 const Footer = () => {
 
     return (
@@ -7,8 +8,13 @@ const Footer = () => {
                     SoRa Sneakers
                 </span>
                 <span className="text-white font-bold tracking-tight flex gap-4 font-inter">
-                    <span>Privacy Policy</span>
-                    <span>Terms of Service</span>
+                   <Link to="/privacyPolicy">
+                        Privacy Policy
+                    </Link>
+
+                    <Link to="/termsOfService">
+                        Terms of Service
+                    </Link>
                 </span>
             </div>
         </div>
