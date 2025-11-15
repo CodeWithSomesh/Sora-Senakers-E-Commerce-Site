@@ -49,7 +49,7 @@ const updateCurrentUser = async (req: Request, res: Response) => {
         console.log('hi 0')
 
         /* Destructuring and taking name, addressLine1, country and city from request body */
-        const { name, addressLine1, country, city } = req.body;
+        const { name, addressLine1, country, city, mfaEnabled } = req.body;
         /* find user by MongoDB ID  */
         const user = await User.findById(req.userId);
 
@@ -65,6 +65,7 @@ const updateCurrentUser = async (req: Request, res: Response) => {
         user.addressLine1 = addressLine1;
         user.city = city;
         user.country = country;
+        user.mfaEnabled = mfaEnabled;
 
         // Save user details in the database
         await user.save();

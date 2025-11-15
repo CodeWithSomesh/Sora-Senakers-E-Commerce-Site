@@ -119,7 +119,7 @@ const AuthCallbackPage = () => {
           <div className="text-center">
             <h3 className="text-2xl font-bold mb-2">Email Not Verified</h3>
             <p className="text-sm text-gray-600 mb-4">
-              Enter your email address to receive a new verification link.
+              Check your inbox or enter your email address to receive a new verification link.
             </p>
           </div>
 
