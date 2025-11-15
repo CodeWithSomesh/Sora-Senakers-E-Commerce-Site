@@ -215,9 +215,9 @@ const deleteProduct = async (req: Request, res: Response) => {
                     let publicId: string | undefined;
                     
                     // Check if imageData has publicId property (new format)
-                    if (imageData && typeof imageData === 'object' && 'publicId' in imageData) {
-                        publicId = imageData.publicId;
-                    }
+                    // if (imageData && typeof imageData === 'object' && 'publicId' in imageData) {
+                    //     publicId = imageData.publicId;
+                    // }
                     
                     if (publicId) {
                         await cloudinary.v2.uploader.destroy(publicId, { 
