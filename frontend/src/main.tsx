@@ -1,12 +1,12 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-
-import './global.css'
-import { BrowserRouter as Router } from 'react-router-dom';
-import AppRoutes from './AppRoutes';
-import Auth0ProviderWithNavigate from './auth/Auth0ProviderWithNavigate';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { Toaster } from 'sonner';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./global.css";
+import { BrowserRouter as Router } from "react-router-dom";
+import AppRoutes from "./AppRoutes";
+import Auth0ProviderWithNavigate from "./auth/Auth0ProviderWithNavigate";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { Toaster } from "sonner";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,15 +16,17 @@ const queryClient = new QueryClient({
   },
 });
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Router>
       <QueryClientProvider client={queryClient}>
         <Auth0ProviderWithNavigate>
-          <AppRoutes/>
-          <Toaster visibleToasts={1} position="top-right" richColors/>
+          <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY!}>
+            <AppRoutes />
+            <Toaster visibleToasts={1} position="top-right" richColors />
+          </GoogleReCaptchaProvider>
         </Auth0ProviderWithNavigate>
-      </QueryClientProvider>      
+      </QueryClientProvider>
     </Router>
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);

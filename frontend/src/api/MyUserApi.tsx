@@ -45,6 +45,7 @@ type CreateUserRequest = {
     auth0Id: string;
     email: string;
     isAdmin: boolean;
+    recaptchaToken: string;
 };
 
 /* hook 1: components use to call the endpoint*/
