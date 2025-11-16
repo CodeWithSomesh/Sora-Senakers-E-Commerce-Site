@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useMutation, useQuery } from "react-query";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { trackAdminAction } from "@/services/security.service";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -58,12 +59,32 @@ export const useCreateProduct = () => {
         return response.json();
     };
 
-    const { 
-        mutate: createProduct, 
-        isLoading, 
-        isSuccess, 
-        error 
-    } = useMutation(createProductRequest);
+    const {
+        mutate: createProduct,
+        isLoading,
+        isSuccess,
+        error,
+        data: createdProduct
+    } = useMutation(createProductRequest, {
+        /**
+         * SECURITY TRACKING: Log product addition to admin activity log
+         * Security Benefit: Complete audit trail of all product changes
+         */
+        onSuccess: async (data) => {
+            try {
+                const accessToken = await getAccessTokenSilently();
+                const productName = data && data.length > 0 ? data[0].productName : "Unknown Product";
+                await trackAdminAction(
+                    "product_add",
+                    "product",
+                    productName,
+                    accessToken
+                );
+            } catch (err) {
+                console.error("Failed to track admin action:", err);
+            }
+        }
+    });
 
     let redirectPath = ""
     if(isSuccess) {
@@ -114,7 +135,27 @@ export const useUpdateProduct = () => {
         isLoading,
         error,
         isSuccess,
-    } = useMutation(updateProductRequest);
+        data: updatedProduct
+    } = useMutation(updateProductRequest, {
+        /**
+         * SECURITY TRACKING: Log product update to admin activity log
+         * Security Benefit: Track all modifications to products for accountability
+         */
+        onSuccess: async (data) => {
+            try {
+                const accessToken = await getAccessTokenSilently();
+                const productName = data?.productName || "Unknown Product";
+                await trackAdminAction(
+                    "product_edit",
+                    "product",
+                    productName,
+                    accessToken
+                );
+            } catch (err) {
+                console.error("Failed to track admin action:", err);
+            }
+        }
+    });
 
     const navigate = useNavigate();
     if (isSuccess) {
@@ -131,6 +172,6 @@ export const useUpdateProduct = () => {
     return {
         updateShop,
         isLoading,
-        
+
     };
 };

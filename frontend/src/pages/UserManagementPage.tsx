@@ -15,6 +15,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useSidebar } from "@/context/SidebarContext";
 
 const UserManagementPage = () => {
     const { users, isLoading, refetch } = useGetAllUsers();
@@ -23,6 +24,7 @@ const UserManagementPage = () => {
     const { demoteToUser } = useDemoteToUser();
     const { deactivateAccount } = useDeactivateAccount();
     const { activateAccount } = useActivateAccount();
+    const { isCollapsed } = useSidebar();
 
     const [searchTerm, setSearchTerm] = useState("");
     const [confirmDialog, setConfirmDialog] = useState<{
@@ -132,7 +134,7 @@ const UserManagementPage = () => {
         return (
             <div className="flex">
                 <AdminSidebar />
-                <div className="flex-1 ml-[350px] p-8">
+                <div className={`flex-1 ml-0 p-4 md:p-6 lg:p-8 pt-16 lg:pt-8 transition-all duration-300 ${isCollapsed ? 'lg:ml-[80px]' : 'lg:ml-[350px]'}`}>
                     <div className="flex justify-center items-center h-screen">
                         <p className="text-2xl font-inter">Loading users...</p>
                     </div>
@@ -144,7 +146,7 @@ const UserManagementPage = () => {
     return (
         <div className="flex">
             <AdminSidebar />
-            <div className="flex-1 ml-[350px] p-8">
+            <div className={`flex-1 ml-0 p-4 md:p-6 lg:p-8 pt-16 lg:pt-8 transition-all duration-300 ${isCollapsed ? 'lg:ml-[80px]' : 'lg:ml-[350px]'}`}>
                 <div className="max-w-7xl mx-auto">
                     <h1 className="text-4xl font-bold font-inter mb-8">User Management</h1>
 

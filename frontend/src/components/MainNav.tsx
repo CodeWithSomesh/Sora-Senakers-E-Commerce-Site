@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import UsernameMenu from "./UsernameMenu";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const MainNav = () => {
   const { loginWithRedirect, isAuthenticated } = useAuth0();
@@ -35,14 +36,23 @@ const MainNav = () => {
       {isAuthenticated ? (
         <UsernameMenu />
       ) : (
-        <Button
-          variant="ghost"
-          disabled={loading}
-          className="font-bold font-inter hover:text-violet3 bg-violet2 text-white py-5 hover:bg-black"
-          onClick={handleLogin}
-        >
-          {loading ? "Verifying..." : "Login"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            disabled={loading}
+            className="font-bold font-inter hover:text-violet3 bg-violet2 text-white py-5 hover:bg-black"
+            onClick={handleLogin}
+          >
+            {loading ? "Verifying..." : "Login"}
+          </Button>
+
+          {/* //Remove this after fixing login issue */}
+            {/* <Link  
+                to="/admin/orderDetails" 
+                className="font-bold hover:text-violet3">
+                Admin
+            </Link> */}
+        </div>
       )}
     </span>
   );

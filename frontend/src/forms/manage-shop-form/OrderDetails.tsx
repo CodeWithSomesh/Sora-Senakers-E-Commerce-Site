@@ -12,6 +12,7 @@ import {
 import axios from 'axios';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
+import { useSidebar } from '@/context/SidebarContext';
 
 
 const fetchAllOrders = async () => {
@@ -21,8 +22,9 @@ const fetchAllOrders = async () => {
 
 const OrderDetails = () => {
   const [searchTerm, setSearchTerm] = useState('')
+  const { isCollapsed } = useSidebar();
 
-  // Retrieving all Orders from the DB 
+  // Retrieving all Orders from the DB
   const { data: orders, isLoading, isError } = useQuery('orders', fetchAllOrders);
   console.log(orders)
 
@@ -53,9 +55,9 @@ const OrderDetails = () => {
   return (
     <div>
         <AdminSidebar />
-        
 
-        <div className="space-y-6 bg-gray-50 px-10 pb-10 py-4  ml-[350px] pt-3 min-h-screen">
+
+        <div className={`space-y-6 bg-gray-50 px-4 md:px-6 lg:px-10 pb-10 py-4 ml-0 pt-16 lg:pt-3 min-h-screen transition-all duration-300 ${isCollapsed ? 'lg:ml-[80px]' : 'lg:ml-[350px]'}`}>
 
           <Input type="email" placeholder="Search by Buyer Name..." onChange={e => setSearchTerm(e.target.value)}
           className='border-gray-400 py-6 text-lg font-inter font-medium italic'  />

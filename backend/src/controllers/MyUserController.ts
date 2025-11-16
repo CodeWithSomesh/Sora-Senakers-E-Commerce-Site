@@ -1,5 +1,7 @@
 import { Request, Response} from "express";
 import User from "../models/user";
+import SecurityLog from "../models/securityLog";
+import AnalyticsEvent from "../models/analyticsEvent";
 
 const getCurrentUser = async (req: Request, res: Response) => {
     try{
@@ -19,22 +21,69 @@ const createCurrentUser = async (req: Request, res: Response) => {
 
     try {
         // Destructuring auth0Id from request body
-        const { auth0Id } = req.body; 
+        const { auth0Id } = req.body;
+        const ipAddress = req.ip || req.headers['x-forwarded-for'] as string || "unknown";
+        const userAgent = req.headers['user-agent'] || "unknown";
 
-        // Checking in the database whether there are any existing users with the same auth)Id
-        const existingUser = await User.findOne({ auth0Id }); 
-        
-        // If user exists, return auth0Id in-built error message 
+        // Checking in the database whether there are any existing users with the same auth0Id
+        const existingUser = await User.findOne({ auth0Id });
+
+        // If user exists, this is a successful login
         if(existingUser){
+            /**
+             * SECURITY TRACKING: Log successful login
+             * Security Benefit: Track authentication patterns and user activity
+             */
+            await SecurityLog.create({
+                eventType: "successful_login",
+                userId: existingUser._id.toString(),
+                username: existingUser.email,
+                ipAddress,
+                userAgent,
+                severity: "low",
+                details: { auth0Id },
+                timestamp: new Date(),
+            });
+
+            // Also track in analytics
+            await AnalyticsEvent.create({
+                eventType: "login",
+                userId: existingUser._id.toString(),
+                timestamp: new Date(),
+                data: { username: existingUser.email },
+            });
+
             return res.status(200).send();
         }
 
-        // If there is no existing user,
-        // create a new user with all the details given in request body
-        const newUser = new User(req.body); 
+        // If there is no existing user, create a new user (signup)
+        const newUser = new User(req.body);
         await newUser.save();
 
-        // If successfully created user, then return success respond message  
+        /**
+         * SECURITY TRACKING: Log new user signup
+         * Security Benefit: Monitor new account creation for potential abuse
+         */
+        await SecurityLog.create({
+            eventType: "successful_login", // First time login after signup
+            userId: newUser._id.toString(),
+            username: newUser.email,
+            ipAddress,
+            userAgent,
+            severity: "low",
+            details: { auth0Id, newAccount: true },
+            timestamp: new Date(),
+        });
+
+        // Track signup in analytics
+        await AnalyticsEvent.create({
+            eventType: "signup",
+            userId: newUser._id.toString(),
+            timestamp: new Date(),
+            data: { username: newUser.email },
+        });
+
+        // If successfully created user, then return success respond message
         res.status(201).json(newUser.toObject());
     }
     catch (error) {

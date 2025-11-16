@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { trackFailedLogin } from "../services/security.service";
 
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
@@ -66,6 +67,23 @@ const AuthCallbackPage = () => {
       setResending(false);
     }
   };
+
+  /**
+   * SECURITY TRACKING: Track failed login attempts
+   * Automatically logs authentication errors to security dashboard
+   */
+  useEffect(() => {
+    if (error === "access_denied" && errorDescription === "email_not_verified") {
+      // Track failed login due to unverified email
+      trackFailedLogin(email || "unknown", email, "Email not verified");
+    } else if (error === "access_denied" && errorDescription === "User did not authorize the request") {
+      // Track failed login due to user denying authorization
+      trackFailedLogin("unknown", "", "User denied authorization");
+    } else if (error) {
+      // Track any other authentication errors
+      trackFailedLogin("unknown", "", errorDescription || error);
+    }
+  }, [error, errorDescription, email]);
 
   useEffect(() => {
     // Only create user and navigate if there's no error AND user exists
