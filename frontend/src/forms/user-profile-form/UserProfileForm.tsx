@@ -142,11 +142,11 @@ const UserProfileForm = ({ onSave, isLoading, currentUser}: Props) => {
             const endpoint = checked ? "/api/mfa/enable" : "/api/mfa/disable";
             const accessToken = await getAccessTokenSilently();
 
-            const response = await fetch(http://localhost:7000${endpoint}, {
+            const response = await fetch(`http://localhost:7000${endpoint}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": Bearer ${accessToken}
+                    "Authorization": `Bearer ${accessToken}`
                 },
                 body: JSON.stringify({ userId: currentUser.auth0Id })
             });
@@ -160,7 +160,7 @@ const UserProfileForm = ({ onSave, isLoading, currentUser}: Props) => {
                     setTimeout(() => setShowSuccessNotification(false), 3000);
                 }
             } else {
-                setMfaError(data.error || Failed to ${checked ? 'enable' : 'disable'} MFA);
+                setMfaError(data.error || `Failed to ${checked ? 'enable' : 'disable'} MFA`);
                 onSuccess(!checked);
             }
         } catch (err) {
