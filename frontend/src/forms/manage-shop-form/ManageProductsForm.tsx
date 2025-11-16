@@ -16,13 +16,15 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { useEffect, useState } from 'react';
+import { useSidebar } from '@/context/SidebarContext';
 
 
 const ManageProductsForm = () => {
   // ALL STATES
-  const { product } = useGetProduct(); //Retrieving All products from the DB 
+  const { product } = useGetProduct(); //Retrieving All products from the DB
   const [searchTerm, setSearchTerm] = useState('')
   const [productList, setProductList] = useState<Product[]>([]);
+  const { isCollapsed } = useSidebar();
 
   // Initialize productList with products once they are loaded
   useEffect(() => {
@@ -59,9 +61,9 @@ const ManageProductsForm = () => {
   return (
     <div className=''>
         <AdminSidebar />
-        
 
-        <div className="space-y-6 bg-gray-50 px-10 min-h-screen py-4  ml-[350px] pt-3">
+
+        <div className={`space-y-6 bg-gray-50 px-4 md:px-6 lg:px-10 min-h-screen py-4 ml-0 pt-16 lg:pt-3 transition-all duration-300 ${isCollapsed ? 'lg:ml-[80px]' : 'lg:ml-[350px]'}`}>
 
           <Input type="email" placeholder="Search by Product Name..." onChange={e => setSearchTerm(e.target.value)}
           className='border-gray-400 py-6 text-lg font-inter font-medium italic'  />

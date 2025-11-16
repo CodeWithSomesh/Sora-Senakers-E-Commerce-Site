@@ -18,14 +18,11 @@ import UpdateProductDetails from "./forms/manage-shop-form/UpdateProductDetails"
 import PaymentPage from "./pages/PaymentPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicy";
 import TermsOfServicePage from "./pages/TermsOfService";
-<<<<<<< Updated upstream
 import UserManagementPage from "./pages/UserManagementPage";
-=======
 import AnalyticsDashboardPage from "./pages/AnalyticsDashboardPage";
 import { useSessionTimeout } from "./hooks/useSessionTimeout";
 import { SessionTimeoutWarning } from "./components/SessionTimeoutWarning";
 import { useAuth0 } from "@auth0/auth0-react";
->>>>>>> Stashed changes
 
 const AppRoutes = () => {
     const { isAuthenticated } = useAuth0();
@@ -44,8 +41,8 @@ const AppRoutes = () => {
             )}
 
             <Routes>
-            <Route 
-                path="/" 
+            <Route
+                path="/"
                 element={<Layout homePage>
                     <HomePage/>
                 </Layout>}
@@ -53,8 +50,8 @@ const AppRoutes = () => {
 
             <Route path="auth-callback" element={<AuthCallbackPage/>}/>
 
-            <Route 
-                path="/menProducts" 
+            <Route
+                path="/menProducts"
                 element={
                     <Layout homePage={false}>
                         <MenProductPage />
@@ -62,8 +59,8 @@ const AppRoutes = () => {
                 }
             />
 
-            <Route 
-                path="/womenProducts" 
+            <Route
+                path="/womenProducts"
                 element={
                     <Layout homePage={false}>
                         <WomenProductPage />
@@ -71,8 +68,8 @@ const AppRoutes = () => {
                 }
             />
 
-            <Route 
-                path="/kidsProducts" 
+            <Route
+                path="/kidsProducts"
                 element={
                     <Layout homePage={false}>
                         <KidsProductPage />
@@ -80,8 +77,8 @@ const AppRoutes = () => {
                 }
             />
 
-            <Route 
-                path="/products/:id" 
+            <Route
+                path="/products/:id"
                 element={
                     <Layout homePage={false}>
                         <ProductDetailsPage />
@@ -89,8 +86,8 @@ const AppRoutes = () => {
                 }
             />
 
-            <Route 
-                path="/search/:color" 
+            <Route
+                path="/search/:color"
                 element={
                     <Layout homePage={false}>
                         <SearchPage/>
@@ -98,8 +95,8 @@ const AppRoutes = () => {
                 }
             />
 
-            <Route 
-                path="/detail/:shopId" 
+            <Route
+                path="/detail/:shopId"
                 element={
                     <Layout homePage={false}>
                         <DetailPage/>
@@ -107,16 +104,16 @@ const AppRoutes = () => {
                 }
             />
 
-            <Route 
-                path="/privacyPolicy" 
+            <Route
+                path="/privacyPolicy"
                 element={
                     <Layout homePage={false}>
                         <PrivacyPolicyPage />
                     </Layout>
                 }
             />
-            <Route 
-                path="/termsOfService" 
+            <Route
+                path="/termsOfService"
                 element={
                     <Layout homePage={false}>
                         <TermsOfServicePage />
@@ -125,56 +122,56 @@ const AppRoutes = () => {
             />
 
             <Route element={<ProtectedRoute/>}>
-                <Route 
-                    path="/products/checkout/:id" 
+                <Route
+                    path="/products/checkout/:id"
                     element={
                         <Layout>
                             <PaymentPage />
                         </Layout>
                     }
                 />
-                <Route 
-                    path="/user-profile" 
+                <Route
+                    path="/user-profile"
                     element={
                         <Layout>
                             <UserProfilePage/>
                         </Layout>
                     }
                 />
-                <Route 
-                    path="/user-profile/:productID" 
+                <Route
+                    path="/user-profile/:productID"
                     element={
                         <Layout>
                             <UserProfilePage/>
                         </Layout>
                     }
                 />
-                <Route 
-                    path="/admin/manageHomePage" 
+                <Route
+                    path="/admin/manageHomePage"
                     element={
                         <Layout adminPage={true} >
                             <ManageHomePageForm />
                         </Layout>
                     }
                 />
-                <Route 
-                    path="/admin/addProducts" 
+                <Route
+                    path="/admin/addProducts"
                     element={
                         <Layout adminPage={true} >
                             <ManageShopPage />
                         </Layout>
                     }
                 />
-                <Route 
-                    path="/admin/manageProducts" 
+                <Route
+                    path="/admin/manageProducts"
                     element={
                         <Layout adminPage={true} >
                             <ManageProductsForm />
                         </Layout>
                     }
                 />
-                <Route 
-                    path="/admin/manageProducts/update/:id" 
+                <Route
+                    path="/admin/manageProducts/update/:id"
                     element={
                         <Layout adminPage={true} >
                             <ManageShopPage />
@@ -190,17 +187,18 @@ const AppRoutes = () => {
                     }
                 />
                 <Route
-<<<<<<< Updated upstream
                     path="/admin/userManagement"
                     element={
                         <Layout adminPage={true} >
                             <UserManagementPage />
-=======
+                        </Layout>
+                    }
+                />
+                <Route
                     path="/admin/analytics"
                     element={
                         <Layout adminPage={true} >
                             <AnalyticsDashboardPage />
->>>>>>> Stashed changes
                         </Layout>
                     }
                 />

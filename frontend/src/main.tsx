@@ -7,6 +7,7 @@ import Auth0ProviderWithNavigate from "./auth/Auth0ProviderWithNavigate";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Toaster } from "sonner";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
+import { SidebarProvider } from "./context/SidebarContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,8 +23,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <Auth0ProviderWithNavigate>
           <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY!}>
-            <AppRoutes />
-            <Toaster visibleToasts={1} position="top-right" richColors />
+            <SidebarProvider>
+              <AppRoutes />
+              <Toaster visibleToasts={1} position="top-right" richColors />
+            </SidebarProvider>
           </GoogleReCaptchaProvider>
         </Auth0ProviderWithNavigate>
       </QueryClientProvider>

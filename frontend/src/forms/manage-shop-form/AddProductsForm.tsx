@@ -11,6 +11,7 @@ import AdminSidebar from "@/components/AdminSidebar";
 import ProductImageSection from "./ProductImageSection";
 import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSidebar } from "@/context/SidebarContext";
 
 
 
@@ -65,6 +66,7 @@ const AddProductsForm = ({ onSave, isLoading, product, redirectPath }: Props) =>
     const [productTag, setProductTag] = useState<string>('newArrivals');
     const [addedPhotos, setAddedPhotos] = useState<string[]>([]);
     const navigate = useNavigate();
+    const { isCollapsed } = useSidebar();
 
     const location = useLocation(); // Retrieving the path of the current page
     const path = location.pathname
@@ -156,10 +158,10 @@ const AddProductsForm = ({ onSave, isLoading, product, redirectPath }: Props) =>
         <div className="flex">
             <AdminSidebar />
             <Form {...form}>
-                
-                    <form 
-                        onSubmit={form.handleSubmit(onSubmit)} 
-                        className="space-y-8 bg-gray-50 px-10 pb-10 py-4 rounded-lg w-full ml-[350px]"
+
+                    <form
+                        onSubmit={form.handleSubmit(onSubmit)}
+                        className={`space-y-8 bg-gray-50 px-4 md:px-6 lg:px-10 pb-10 py-4 rounded-lg w-full ml-0 pt-16 lg:pt-4 transition-all duration-300 ${isCollapsed ? 'lg:ml-[80px]' : 'lg:ml-[350px]'}`}
                     >
                         
                         <DetailsSection 

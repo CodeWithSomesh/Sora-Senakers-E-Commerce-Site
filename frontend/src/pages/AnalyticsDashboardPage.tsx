@@ -14,9 +14,11 @@ import { getSecurityDashboard } from "../services/security.service";
 import { DashboardData } from "../types/analytics.types";
 import { SecurityDashboardData } from "../types/security.types";
 import { RefreshCw, BarChart3, Shield } from "lucide-react";
+import { useSidebar } from "../context/SidebarContext";
 
 export default function AnalyticsDashboardPage() {
   const { getAccessTokenSilently } = useAuth0();
+  const { isCollapsed } = useSidebar();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [securityData, setSecurityData] = useState<SecurityDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -207,53 +209,55 @@ export default function AnalyticsDashboardPage() {
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
 
-      <div className="flex-1 ml-[350px] p-8">
+      <div className={`flex-1 ml-0 p-4 md:p-6 lg:p-8 pt-16 lg:pt-8 transition-all duration-300 ${isCollapsed ? 'lg:ml-[80px]' : 'lg:ml-[350px]'}`}>
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-6 md:mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
-                <div className={activeTab === "security" ? "bg-red-100 p-3 rounded-lg" : "bg-purple-100 p-3 rounded-lg"}>
+                <div className={activeTab === "security" ? "bg-red-100 p-2 md:p-3 rounded-lg" : "bg-purple-100 p-2 md:p-3 rounded-lg"}>
                   {activeTab === "security" ? (
-                    <Shield className="h-8 w-8 text-red-600" />
+                    <Shield className="h-6 w-6 md:h-8 md:w-8 text-red-600" />
                   ) : (
-                    <BarChart3 className="h-8 w-8 text-purple-600" />
+                    <BarChart3 className="h-6 w-6 md:h-8 md:w-8 text-purple-600" />
                   )}
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
+                  <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
                     {activeTab === "security" ? "Security Analytics" : "Analytics Dashboard"}
                   </h1>
-                  <p className="text-gray-600 mt-1">
+                  <p className="text-sm md:text-base text-gray-600 mt-1">
                     Last updated: {lastRefresh.toLocaleTimeString()}
                   </p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
               {/* Tab Buttons */}
-              <div className="flex bg-white rounded-lg shadow-sm border p-1">
+              <div className="flex bg-white rounded-lg shadow-sm border p-1 w-full sm:w-auto">
                 <button
                   onClick={() => setActiveTab("security")}
-                  className={`px-4 py-2 rounded-md font-semibold transition-colors ${
+                  className={`px-3 md:px-4 py-2 rounded-md font-semibold transition-colors text-sm md:text-base flex-1 sm:flex-none ${
                     activeTab === "security"
                       ? "bg-red-600 text-white"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
-                  <Shield className="h-4 w-4 inline mr-2" />
-                  Security
+                  <Shield className="h-4 w-4 inline mr-1 md:mr-2" />
+                  <span className="hidden sm:inline">Security</span>
+                  <span className="sm:hidden">Sec</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("overview")}
-                  className={`px-4 py-2 rounded-md font-semibold transition-colors ${
+                  className={`px-3 md:px-4 py-2 rounded-md font-semibold transition-colors text-sm md:text-base flex-1 sm:flex-none ${
                     activeTab === "overview"
                       ? "bg-purple-600 text-white"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
-                  <BarChart3 className="h-4 w-4 inline mr-2" />
-                  Overview
+                  <BarChart3 className="h-4 w-4 inline mr-1 md:mr-2" />
+                  <span className="hidden sm:inline">Overview</span>
+                  <span className="sm:hidden">Over</span>
                 </button>
               </div>
 
@@ -261,19 +265,20 @@ export default function AnalyticsDashboardPage() {
               {showDummyButton && (
                 <button
                   onClick={loadDummyData}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors font-semibold"
+                  className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors font-semibold text-sm md:text-base"
                 >
-                  Use Dummy Data
+                  <span className="hidden sm:inline">Use Dummy Data</span>
+                  <span className="sm:hidden">Dummy Data</span>
                 </button>
               )}
 
               <button
                 onClick={handleRefresh}
                 disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
+                <span className="hidden sm:inline">Refresh</span>
               </button>
             </div>
           </div>
