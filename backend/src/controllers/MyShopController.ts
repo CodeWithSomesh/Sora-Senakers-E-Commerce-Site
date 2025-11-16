@@ -1,4 +1,5 @@
-
+//MyShopController.csv
+// Encrypted image 
 // const getMyShop = async (req: Request, res: Response) => {
 //     try {
 //         const shop = await Shop.findOne({ user: req.userId });
@@ -104,6 +105,7 @@ const uploadImage = async (file: Express.Multer.File): Promise<{
     }
 };
 
+
 // Upload multiple encrypted images endpoint
 const uploadProductImages = async (req: Request, res: Response) => {
     try {
@@ -203,35 +205,13 @@ const deleteProduct = async (req: Request, res: Response) => {
         }
 
         const product = await Product.findByIdAndDelete(productId);
-
+        
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
         }
-
-        // Delete encrypted images from Cloudinary
-        if (product.productImages && product.productImages.length > 0) {
-            for (const imageData of product.productImages) {
-                try {
-                    let publicId: string | undefined;
-                    
-                    // Check if imageData has publicId property (new format)
-                    if (imageData && typeof imageData === 'object' && 'publicId' in imageData) {
-                        publicId = imageData.publicId;
-                    }
-                    
-                    if (publicId) {
-                        await cloudinary.v2.uploader.destroy(publicId, { 
-                            resource_type: 'raw' 
-                        });
-                        console.log(`✅ Deleted image: ${publicId}`);
-                    }
-                } catch (err) {
-                    console.error('Error deleting image from Cloudinary:', err);
-                }
-            }
-        }
-
+        
         res.status(200).json({ message: "Product deleted successfully" });
+        
     } catch (error) {
         console.log(error);
         res.status(500).json({ 
@@ -280,3 +260,10 @@ export default {
     encryptImage,
     decryptImage
 };
+
+
+
+
+
+
+
