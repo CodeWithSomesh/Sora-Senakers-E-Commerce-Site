@@ -11,6 +11,7 @@ import orderRoute from "./routes/OrderRoute"
 import verificationRoute from "./routes/VerificationRoute";
 import mfaRoute from "./routes/MfaRoute";
 import photoRoute from "./routes/PhotoRoute";
+import adminUserRoute from "./routes/AdminUserRoute";
 import multer from "multer";
 import fs from "fs"
 import path from "path"
@@ -46,6 +47,7 @@ app.use("/api/order", orderRoute);
 app.use("/api/verification", verificationRoute);
 app.use("/api/mfa", mfaRoute);
 app.use("/api/my/user/photo", photoRoute);
+app.use("/api/admin/users", adminUserRoute);
 
 interface MulterRequest extends Request {
     files: Express.Multer.File[]; // Typing for `req.files`

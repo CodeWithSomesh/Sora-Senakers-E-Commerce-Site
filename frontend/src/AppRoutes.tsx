@@ -18,6 +18,7 @@ import UpdateProductDetails from "./forms/manage-shop-form/UpdateProductDetails"
 import PaymentPage from "./pages/PaymentPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicy";
 import TermsOfServicePage from "./pages/TermsOfService";
+import UserManagementPage from "./pages/UserManagementPage";
 
 const AppRoutes = () => {
     return (
@@ -159,11 +160,19 @@ const AppRoutes = () => {
                         </Layout>
                     }
                 />
-                <Route 
-                    path="/admin/orderDetails" 
+                <Route
+                    path="/admin/orderDetails"
                     element={
                         <Layout adminPage={true} >
                             <OrderDetails />
+                        </Layout>
+                    }
+                />
+                <Route
+                    path="/admin/userManagement"
+                    element={
+                        <Layout adminPage={true} >
+                            <UserManagementPage />
                         </Layout>
                     }
                 />

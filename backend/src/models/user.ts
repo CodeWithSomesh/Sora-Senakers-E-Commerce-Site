@@ -30,6 +30,14 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    isSuperAdmin:{
+        type: Boolean,
+        default: false,
+    },
+    isActive:{
+        type: Boolean,
+        default: true,
+    },
     profilePhoto: {
         encryptedData: {
             type: String,

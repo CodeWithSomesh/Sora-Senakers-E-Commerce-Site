@@ -7,7 +7,9 @@ export type User = {
     city: string;
     country: string;
     mfaEnabled?: boolean;
-    isAdmin: false;
+    isAdmin: boolean;
+    isSuperAdmin?: boolean;
+    isActive?: boolean;
 };
 
 export type SizeStock = {
