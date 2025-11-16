@@ -29,7 +29,7 @@ router.post(
     "/", 
     upload.none(),
     //upload.array("imageFile", 5), 
-    //validateMyShopRequest,
+    validateMyShopRequest,
     jwtCheck,
     jwtParse,
     MyShopController.createProduct
@@ -41,7 +41,7 @@ router.put(
     "/update/:productId", 
     upload.none(),
     // upload.array("imageFile", 5), 
-    // validateMyShopRequest,
+    validateMyShopRequest,
     jwtCheck,
     jwtParse,
     MyShopController.updateProduct

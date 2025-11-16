@@ -17,7 +17,7 @@ router.get(
 
 router.get(
     "/search/:color", 
-    param("city")
+    param("color")
         .isString()
         .trim()
         .notEmpty()

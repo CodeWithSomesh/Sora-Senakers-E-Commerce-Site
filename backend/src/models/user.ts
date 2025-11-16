@@ -30,6 +30,20 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    profilePhoto: {
+        encryptedData: {
+            type: String,
+        },
+        iv: {
+            type: String,
+        },
+        mimeType: {
+            type: String,
+        },
+        uploadedAt: {
+            type: Date,
+        },
+    },
 });
 
 const User = mongoose.model("User", userSchema);
