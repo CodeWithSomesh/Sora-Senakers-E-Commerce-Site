@@ -13,6 +13,8 @@ import { Trash2 } from "lucide-react"
 import { Button } from "./ui/button"
 import axios from "axios";
 import { toast } from "sonner";
+import { trackAdminAction } from "@/services/security.service";
+import { useAuth0 } from "@auth0/auth0-react";
 
 
 interface DeleteButtonProps {
@@ -21,12 +23,31 @@ interface DeleteButtonProps {
 }
 
 const AlertButton: React.FC<DeleteButtonProps> = ({ productId, onDelete }) => {
+  const { getAccessTokenSilently } = useAuth0();
 
-  // DELETE PRODUCT FUNCTION
+  /**
+   * SECURITY TRACKING: Track product deletion in admin activity log
+   * Security Benefit: Monitor all product deletions for audit trail
+   */
   const handleDelete = async () => {
     try {
         const response = await axios.delete(`http://localhost:7000/api/my/shop/products/${productId}`);
         console.log(response.data);
+
+        // Track admin deletion action
+        try {
+            const accessToken = await getAccessTokenSilently();
+            const productName = response.data?.productName || `Product ID: ${productId}`;
+            await trackAdminAction(
+                "product_delete",
+                "product",
+                productName,
+                accessToken
+            );
+        } catch (trackError) {
+            console.error("Failed to track admin action:", trackError);
+        }
+
         onDelete(productId);  // Notify the parent component about the deletion
         toast.success("Product Deleted Successfully!")
     } catch (error) {

@@ -1,6 +1,10 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import Divider from '@mui/material/Divider';
+<<<<<<< Updated upstream
 import { BadgePlus, CircleArrowOutUpRight, CircleDollarSign, Home, LogOut, ShoppingBag, Users } from 'lucide-react';
+=======
+import { BadgePlus, CircleArrowOutUpRight, CircleDollarSign, Home, LogOut, ShoppingBag, BarChart3 } from 'lucide-react';
+>>>>>>> Stashed changes
 import { Link, useLocation } from 'react-router-dom';
 
 
@@ -47,11 +51,19 @@ export default function AdminSidebar() {
             <p className='text-2xl font-inter font-semibold '>Add Product</p>
           </Link>
 
+<<<<<<< Updated upstream
           <Link to="/admin/userManagement"
           className={`flex justify-center items-center my-4 gap-3
           mx-6 py-4 rounded-md hover:bg-violet2 hover:text-white ${path == "/admin/userManagement" ? "bg-violet2 hover:bg-violet3 text-white" : ""}`}>
             <Users width={36} height={36} className='-ml-[65px]' />
             <p className='text-2xl font-inter font-semibold '>User Details</p>
+=======
+          <Link to="/admin/analytics"
+          className={`flex justify-center items-center my-4 gap-3
+          mx-6 py-4 rounded-md hover:bg-violet2 hover:text-white ${path == "/admin/analytics" ? "bg-violet2 hover:bg-violet3 text-white" : ""}`}>
+            <BarChart3 width={36} height={36} className='-ml-[95px]' />
+            <p className='text-2xl font-inter font-semibold '>Analytics</p>
+>>>>>>> Stashed changes
           </Link>
         </div>
 

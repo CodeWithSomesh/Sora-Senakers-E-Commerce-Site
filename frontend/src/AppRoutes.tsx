@@ -18,11 +18,32 @@ import UpdateProductDetails from "./forms/manage-shop-form/UpdateProductDetails"
 import PaymentPage from "./pages/PaymentPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicy";
 import TermsOfServicePage from "./pages/TermsOfService";
+<<<<<<< Updated upstream
 import UserManagementPage from "./pages/UserManagementPage";
+=======
+import AnalyticsDashboardPage from "./pages/AnalyticsDashboardPage";
+import { useSessionTimeout } from "./hooks/useSessionTimeout";
+import { SessionTimeoutWarning } from "./components/SessionTimeoutWarning";
+import { useAuth0 } from "@auth0/auth0-react";
+>>>>>>> Stashed changes
 
 const AppRoutes = () => {
+    const { isAuthenticated } = useAuth0();
+    const { showWarning, timeRemaining, handleStayLoggedIn, handleLogout } = useSessionTimeout();
+
     return (
-        <Routes>
+        <>
+            {/* Session Timeout Warning Modal */}
+            {isAuthenticated && (
+                <SessionTimeoutWarning
+                    open={showWarning}
+                    timeRemaining={timeRemaining}
+                    onStayLoggedIn={handleStayLoggedIn}
+                    onLogout={handleLogout}
+                />
+            )}
+
+            <Routes>
             <Route 
                 path="/" 
                 element={<Layout homePage>
@@ -169,17 +190,25 @@ const AppRoutes = () => {
                     }
                 />
                 <Route
+<<<<<<< Updated upstream
                     path="/admin/userManagement"
                     element={
                         <Layout adminPage={true} >
                             <UserManagementPage />
+=======
+                    path="/admin/analytics"
+                    element={
+                        <Layout adminPage={true} >
+                            <AnalyticsDashboardPage />
+>>>>>>> Stashed changes
                         </Layout>
                     }
                 />
             </Route>
-            
+
             <Route path="*" element={<Navigate to="/" />}/>
         </Routes>
+        </>
     );
 };
 

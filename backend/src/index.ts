@@ -11,7 +11,14 @@ import orderRoute from "./routes/OrderRoute"
 import verificationRoute from "./routes/VerificationRoute";
 import mfaRoute from "./routes/MfaRoute";
 import photoRoute from "./routes/PhotoRoute";
+<<<<<<< Updated upstream
 import adminUserRoute from "./routes/AdminUserRoute";
+=======
+import sessionRoute from "./routes/SessionRoute";
+import analyticsRoute from "./routes/AnalyticsRoute";
+import securityAnalyticsRoute from "./routes/SecurityAnalyticsRoute";
+import { startAnalyticsAggregationJob } from "./jobs/analyticsAggregation";
+>>>>>>> Stashed changes
 import multer from "multer";
 import fs from "fs"
 import path from "path"
@@ -47,7 +54,13 @@ app.use("/api/order", orderRoute);
 app.use("/api/verification", verificationRoute);
 app.use("/api/mfa", mfaRoute);
 app.use("/api/my/user/photo", photoRoute);
+<<<<<<< Updated upstream
 app.use("/api/admin/users", adminUserRoute);
+=======
+app.use("/api/session", sessionRoute);
+app.use("/api/analytics", analyticsRoute);
+app.use("/api/security", securityAnalyticsRoute);
+>>>>>>> Stashed changes
 
 interface MulterRequest extends Request {
     files: Express.Multer.File[]; // Typing for `req.files`
@@ -120,4 +133,6 @@ app.get('/uploads/:id', (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server started on localhost:${port}`);
+    // Start analytics aggregation cron job
+    startAnalyticsAggregationJob();
 });
