@@ -19,11 +19,11 @@ export const encryptImage = (buffer: Buffer): { encrypted: string; iv: string } 
     const key = Buffer.from(ENCRYPTION_KEY.substring(0, 64), 'hex');
 
     // Create cipher
-    const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+    const cipher = crypto.createCipheriv(ALGORITHM, key as any, iv as any);
 
     // Encrypt the buffer
-    let encrypted = cipher.update(buffer);
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    let encrypted = cipher.update(buffer as any) as Buffer;
+    encrypted = Buffer.concat([encrypted, cipher.final() as Buffer] as any);
 
     return {
       encrypted: encrypted.toString('base64'),
@@ -53,11 +53,11 @@ export const decryptImage = (encryptedData: string, ivHex: string): Buffer => {
     const encryptedBuffer = Buffer.from(encryptedData, 'base64');
 
     // Create decipher
-    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
+    const decipher = crypto.createDecipheriv(ALGORITHM, key as any, iv as any);
 
     // Decrypt the buffer
-    let decrypted = decipher.update(encryptedBuffer);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    let decrypted = decipher.update(encryptedBuffer as any) as Buffer;
+    decrypted = Buffer.concat([decrypted, decipher.final() as Buffer] as any);
 
     return decrypted;
   } catch (error) {

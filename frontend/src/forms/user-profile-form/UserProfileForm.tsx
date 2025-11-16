@@ -1,14 +1,14 @@
 import LoadingButton from "@/components/LoadingButton";
 import ProfilePhotoUpload from "@/components/ProfilePhotoUpload";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { User } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useForm } from "react-hook-form";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -142,11 +142,11 @@ const UserProfileForm = ({ onSave, isLoading, currentUser}: Props) => {
             const endpoint = checked ? "/api/mfa/enable" : "/api/mfa/disable";
             const accessToken = await getAccessTokenSilently();
 
-            const response = await fetch(http://localhost:7000${endpoint}, {
+            const response = await fetch(`http://localhost:7000${endpoint}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": Bearer ${accessToken}
+                    "Authorization": `Bearer ${accessToken}`
                 },
                 body: JSON.stringify({ userId: currentUser.auth0Id })
             });
@@ -160,7 +160,7 @@ const UserProfileForm = ({ onSave, isLoading, currentUser}: Props) => {
                     setTimeout(() => setShowSuccessNotification(false), 3000);
                 }
             } else {
-                setMfaError(data.error || Failed to ${checked ? 'enable' : 'disable'} MFA);
+                setMfaError(data.error || `Failed to ${checked ? 'enable' : 'disable'} MFA`);
                 onSuccess(!checked);
             }
         } catch (err) {
