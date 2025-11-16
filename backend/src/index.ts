@@ -8,6 +8,8 @@ import MyShopController from "./controllers/MyShopController";
 import myShopRoute from "./routes/MyShopRoute";
 import shopRoute from "./routes/ShopRoute"
 import orderRoute from "./routes/OrderRoute"
+import verificationRoute from "./routes/VerificationRoute";
+import mfaRoute from "./routes/MfaRoute";
 import multer from "multer";
 import fs from "fs"
 import path from "path"
@@ -40,7 +42,8 @@ app.use("/api/my/user", myUserRoute);
 app.use("/api/my/shop", myShopRoute);
 app.use("/api/shop", shopRoute);
 app.use("/api/order", orderRoute);
-
+app.use("/api/verification", verificationRoute);
+app.use("/api/mfa", mfaRoute);
 
 interface MulterRequest extends Request {
     files: Express.Multer.File[]; // Typing for `req.files`

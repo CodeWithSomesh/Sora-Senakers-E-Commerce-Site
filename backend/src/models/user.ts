@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
     country:{
         type: String,
     },
+    mfaEnabled:{
+        type: Boolean,
+        default: false,
+    },
     isAdmin:{
         type: Boolean,
         default: false,
