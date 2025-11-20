@@ -75,13 +75,22 @@ const AuthCallbackPage = () => {
   useEffect(() => {
     if (error === "access_denied" && errorDescription === "email_not_verified") {
       // Track failed login due to unverified email
-      trackFailedLogin(email || "unknown", email, "Email not verified");
+      trackFailedLogin(email || "unknown", email, "email_not_verified");
     } else if (error === "access_denied" && errorDescription === "User did not authorize the request") {
       // Track failed login due to user denying authorization
       trackFailedLogin("unknown", "", "User denied authorization");
+    } else if (error === "too_many_attempts" || errorDescription?.toLowerCase().includes("blocked") || errorDescription?.toLowerCase().includes("too many attempts")) {
+      // Track account blocked due to multiple failed attempts
+      const userEmail = new URLSearchParams(window.location.search).get("email") || email || "unknown";
+      trackFailedLogin(userEmail, userEmail, "account_locked");
+    } else if (error === "unauthorized" || error === "access_denied") {
+      // Track failed login due to invalid credentials or blocked account
+      const userEmail = new URLSearchParams(window.location.search).get("email") || email || "unknown";
+      trackFailedLogin(userEmail, userEmail, errorDescription?.toLowerCase().includes("blocked") ? "account_locked" : "invalid_credentials");
     } else if (error) {
       // Track any other authentication errors
-      trackFailedLogin("unknown", "", errorDescription || error);
+      const userEmail = new URLSearchParams(window.location.search).get("email") || email || "unknown";
+      trackFailedLogin(userEmail, userEmail, errorDescription || error);
     }
   }, [error, errorDescription, email]);
 

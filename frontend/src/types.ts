@@ -10,6 +10,7 @@ export type User = {
     isAdmin: boolean;
     isSuperAdmin?: boolean;
     isActive?: boolean;
+    isBlocked?: boolean;
 };
 
 export type SizeStock = {

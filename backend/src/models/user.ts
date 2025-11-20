@@ -38,6 +38,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    isBlocked:{
+        type: Boolean,
+        default: false,
+    },
     profilePhoto: {
         encryptedData: {
             type: String,

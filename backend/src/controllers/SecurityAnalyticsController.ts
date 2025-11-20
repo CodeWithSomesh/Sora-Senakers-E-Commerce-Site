@@ -3,6 +3,8 @@ import SecurityLog from "../models/securityLog";
 import FailedLogin from "../models/failedLogin";
 import AdminAction from "../models/adminAction";
 import AnalyticsEvent from "../models/analyticsEvent";
+import User from "../models/user";
+import { syncAuth0FailedLogins, blockAuth0User } from "../services/auth0Service";
 
 /**
  * SECURITY ANALYTICS CONTROLLER
@@ -58,10 +60,52 @@ export const trackFailedLogin = async (req: Request, res: Response) => {
       timestamp: new Date(),
     });
 
+    // AUTOMATIC BLOCKING: If 3 or more failed attempts, block the user
+    if (shouldFlag) {
+      try {
+        // Find user by email
+        const user = await User.findOne({ email: email || username });
+
+        if (user && !user.isBlocked) {
+          // Block user in database
+          user.isBlocked = true;
+          await user.save();
+
+          // Also block in Auth0
+          try {
+            await blockAuth0User(user.auth0Id);
+          } catch (auth0Error) {
+            console.error("Failed to block user in Auth0:", auth0Error);
+          }
+
+          // Log the account lock event
+          await SecurityLog.create({
+            eventType: "account_locked",
+            userId: user._id.toString(),
+            username: user.email,
+            ipAddress,
+            userAgent,
+            severity: "critical",
+            details: {
+              reason: "Automatic lock due to 3 failed login attempts",
+              attemptCount: recentAttempts + 1,
+            },
+            timestamp: new Date(),
+          });
+
+          console.log(`User ${user.email} automatically blocked due to ${recentAttempts + 1} failed login attempts`);
+        }
+      } catch (blockError) {
+        console.error("Error blocking user after failed attempts:", blockError);
+        // Continue even if blocking fails
+      }
+    }
+
     return res.status(201).json({
       message: "Failed login recorded",
       flagged: shouldFlag,
       attemptCount: recentAttempts + 1,
+      accountBlocked: shouldFlag,
     });
   } catch (error) {
     console.error("Track failed login error:", error);
@@ -361,5 +405,26 @@ export const resolveSecurityAlert = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Resolve security alert error:", error);
     return res.status(500).json({ message: "Failed to resolve security alert" });
+  }
+};
+
+/**
+ * 6. SYNC FAILED LOGINS FROM AUTH0
+ * Security Benefit: Imports failed login attempts from Auth0 logs into our database
+ * This ensures we track all authentication failures, even those handled by Auth0
+ */
+export const syncAuth0Logs = async (req: Request, res: Response) => {
+  try {
+    await syncAuth0FailedLogins();
+
+    return res.status(200).json({
+      message: "Successfully synced failed login attempts from Auth0",
+    });
+  } catch (error: any) {
+    console.error("Sync Auth0 logs error:", error);
+    return res.status(500).json({
+      message: "Failed to sync Auth0 logs",
+      error: error.message
+    });
   }
 };

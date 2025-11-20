@@ -5,6 +5,7 @@ import {
   detectSuspiciousActivity,
   getSecurityDashboard,
   resolveSecurityAlert,
+  syncAuth0Logs,
 } from "../controllers/SecurityAnalyticsController";
 import { jwtCheck, jwtParse } from "../middleware/auth";
 
@@ -24,5 +25,8 @@ router.get("/dashboard", jwtCheck, jwtParse, getSecurityDashboard);
 
 // Resolve security alert (admin only)
 router.patch("/alert/:alertId/resolve", jwtCheck, jwtParse, resolveSecurityAlert);
+
+// Sync failed logins from Auth0 logs (admin only)
+router.post("/sync-auth0-logs", jwtCheck, jwtParse, syncAuth0Logs);
 
 export default router;

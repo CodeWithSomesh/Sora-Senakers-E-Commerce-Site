@@ -1,6 +1,7 @@
-import { useGetAllUsers, usePromoteToAdmin, useDemoteToUser, useDeactivateAccount, useActivateAccount } from "@/api/AdminUserApi";
+import { useGetAllUsers, usePromoteToAdmin, useDemoteToUser, useDeactivateAccount, useActivateAccount, useBlockAccount, useUnblockAccount } from "@/api/AdminUserApi";
 import { useGetMyUser } from "@/api/MyUserApi";
 import AdminSidebar from "@/components/AdminSidebar";
+import SyncAuth0Button from "@/components/SyncAuth0Button";
 import { User } from "@/types";
 import { ShieldCheck, ShieldOff, UserX, UserCheck, AlertTriangle } from "lucide-react";
 import { useState } from "react";
@@ -24,6 +25,8 @@ const UserManagementPage = () => {
     const { demoteToUser } = useDemoteToUser();
     const { deactivateAccount } = useDeactivateAccount();
     const { activateAccount } = useActivateAccount();
+    const { blockAccount } = useBlockAccount();
+    const { unblockAccount } = useUnblockAccount();
     const { isCollapsed } = useSidebar();
 
     const [searchTerm, setSearchTerm] = useState("");
@@ -101,7 +104,7 @@ const UserManagementPage = () => {
         setConfirmDialog({
             isOpen: true,
             title: "Deactivate Account",
-            description: `Are you sure you want to deactivate ${userName || "this user"}'s account? They will no longer be able to access the platform.`,
+            description: `Are you sure you want to deactivate ${userName || "this user"}'s account? They will not be able to access the platform.`,
             onConfirm: async () => {
                 await deactivateAccount(userId);
                 refetch();
@@ -118,6 +121,48 @@ const UserManagementPage = () => {
             description: `Are you sure you want to activate ${userName || "this user"}'s account? They will regain access to the platform.`,
             onConfirm: async () => {
                 await activateAccount(userId);
+                refetch();
+                setConfirmDialog({ ...confirmDialog, isOpen: false });
+            },
+            actionType: "activate",
+        });
+    };
+
+    const handleBlock = (userId: string, userName: string, targetUser: User) => {
+        // Check if action is allowed
+        if (userId === currentUser?._id) {
+            toast.error("You cannot block your own account");
+            return;
+        }
+        if (targetUser.isSuperAdmin) {
+            toast.error("Super admins cannot be blocked");
+            return;
+        }
+        if (targetUser.isAdmin && !currentUser?.isSuperAdmin) {
+            toast.error("Only super admins can block other admins");
+            return;
+        }
+
+        setConfirmDialog({
+            isOpen: true,
+            title: "Block Account",
+            description: `Are you sure you want to block ${userName || "this user"}'s account? They will be blocked from accessing the platform.`,
+            onConfirm: async () => {
+                await blockAccount(userId);
+                refetch();
+                setConfirmDialog({ ...confirmDialog, isOpen: false });
+            },
+            actionType: "deactivate",
+        });
+    };
+
+    const handleUnblock = (userId: string, userName: string) => {
+        setConfirmDialog({
+            isOpen: true,
+            title: "Unblock Account",
+            description: `Are you sure you want to unblock ${userName || "this user"}'s account? They will be able to access the platform again.`,
+            onConfirm: async () => {
+                await unblockAccount(userId);
                 refetch();
                 setConfirmDialog({ ...confirmDialog, isOpen: false });
             },
@@ -148,7 +193,10 @@ const UserManagementPage = () => {
             <AdminSidebar />
             <div className={`flex-1 ml-0 p-4 md:p-6 lg:p-8 pt-16 lg:pt-8 transition-all duration-300 ${isCollapsed ? 'lg:ml-[80px]' : 'lg:ml-[350px]'}`}>
                 <div className="max-w-7xl mx-auto">
-                    <h1 className="text-4xl font-bold font-inter mb-8">User Management</h1>
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-4xl font-bold font-inter">User Management</h1>
+                        <SyncAuth0Button />
+                    </div>
 
                     {/* Search Bar */}
                     <div className="mb-6">
@@ -222,13 +270,17 @@ const UserManagementPage = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-3 py-1 inline-flex text-xs leading-5 text-center font-semibold rounded-full ${
-                                                        user.isActive !== false
-                                                            ? "bg-green-100 text-green-800"
-                                                            : "bg-red-100 text-red-800"
-                                                    }`}>
-                                                        {user.isActive !== false ? "Active" : "Inactive"}
-                                                    </span>
+                                                    <div className="flex items-center gap-2 justify-center">
+                                                        <span className={`px-3 py-1 inline-flex text-xs leading-5 text-center mx-auto font-semibold rounded-full ${
+                                                            user.isBlocked
+                                                                ? "bg-red-100 text-red-800"
+                                                                : !user.isActive
+                                                                ? "bg-yellow-100 text-yellow-800"
+                                                                : "bg-green-100 text-green-800"
+                                                        }`}>
+                                                            {user.isBlocked ? "Blocked" : !user.isActive ? "Deactivated" : "Active"}
+                                                        </span>
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                     <div className="flex justify-center gap-2">
@@ -260,31 +312,39 @@ const UserManagementPage = () => {
                                                             </button>
                                                         )}
 
-                                                        {/* Activate/Deactivate Button */}
-                                                        {user.isActive !== false ? (
+                                                        {/* Block/Unblock or Deactivate/Activate Button */}
+                                                        {user.isBlocked ? (
                                                             <button
-                                                                onClick={() => handleDeactivate(user._id, user.name, user)}
+                                                                onClick={() => handleUnblock(user._id, user.name)}
+                                                                className="inline-flex items-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                                                title="Unblock Account"
+                                                            >
+                                                                <UserCheck className="h-4 w-4" />
+                                                            </button>
+                                                        ) : !user.isActive ? (
+                                                            <button
+                                                                onClick={() => handleActivate(user._id, user.name)}
+                                                                className="inline-flex items-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                                title="Activate Account"
+                                                            >
+                                                                <UserCheck className="h-4 w-4" />
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleBlock(user._id, user.name, user)}
                                                                 className={`inline-flex items-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white ${
                                                                     user._id === currentUser?._id || user.isSuperAdmin || (user.isAdmin && !currentUser?.isSuperAdmin)
                                                                         ? "bg-red-300 cursor-not-allowed"
                                                                         : "bg-red-600 hover:bg-red-700"
                                                                 } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500`}
                                                                 title={
-                                                                    user._id === currentUser?._id ? "Cannot deactivate yourself" :
-                                                                    user.isSuperAdmin ? "Cannot deactivate super admin" :
-                                                                    (user.isAdmin && !currentUser?.isSuperAdmin) ? "Only super admins can deactivate admins" :
-                                                                    "Deactivate Account"
+                                                                    user._id === currentUser?._id ? "Cannot block yourself" :
+                                                                    user.isSuperAdmin ? "Cannot block super admin" :
+                                                                    (user.isAdmin && !currentUser?.isSuperAdmin) ? "Only super admins can block admins" :
+                                                                    "Block Account"
                                                                 }
                                                             >
                                                                 <UserX className="h-4 w-4" />
-                                                            </button>
-                                                        ) : (
-                                                            <button
-                                                                onClick={() => handleActivate(user._id, user.name)}
-                                                                className="inline-flex items-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                                                                title="Activate Account"
-                                                            >
-                                                                <UserCheck className="h-4 w-4" />
                                                             </button>
                                                         )}
                                                     </div>

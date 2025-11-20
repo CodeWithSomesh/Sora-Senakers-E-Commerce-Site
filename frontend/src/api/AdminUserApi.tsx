@@ -195,3 +195,79 @@ export const useActivateAccount = () => {
 
     return { activateAccount, isLoading };
 };
+
+// Block user account
+export const useBlockAccount = () => {
+    const { getAccessTokenSilently } = useAuth0();
+
+    const blockAccountRequest = async (userId: string) => {
+        const accessToken = await getAccessTokenSilently();
+
+        const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/block`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to block user account");
+        }
+
+        return response.json();
+    };
+
+    const {
+        mutateAsync: blockAccount,
+        isLoading,
+    } = useMutation(blockAccountRequest, {
+        onSuccess: () => {
+            toast.success("User account blocked successfully");
+        },
+        onError: (error: any) => {
+            toast.error(error.toString());
+        }
+    });
+
+    return { blockAccount, isLoading };
+};
+
+// Unblock user account
+export const useUnblockAccount = () => {
+    const { getAccessTokenSilently } = useAuth0();
+
+    const unblockAccountRequest = async (userId: string) => {
+        const accessToken = await getAccessTokenSilently();
+
+        const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/unblock`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to unblock user account");
+        }
+
+        return response.json();
+    };
+
+    const {
+        mutateAsync: unblockAccount,
+        isLoading,
+    } = useMutation(unblockAccountRequest, {
+        onSuccess: () => {
+            toast.success("User account unblocked successfully");
+        },
+        onError: (error: any) => {
+            toast.error(error.toString());
+        }
+    });
+
+    return { unblockAccount, isLoading };
+};
