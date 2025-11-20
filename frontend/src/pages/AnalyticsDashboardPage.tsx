@@ -265,7 +265,7 @@ export default function AnalyticsDashboardPage() {
               {showDummyButton && (
                 <button
                   onClick={loadDummyData}
-                  className="flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors font-semibold text-sm md:text-base"
+                  className=" hidden flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors font-semibold text-sm md:text-base"
                 >
                   <span className="hidden sm:inline">Use Dummy Data</span>
                   <span className="sm:hidden">Dummy Data</span>

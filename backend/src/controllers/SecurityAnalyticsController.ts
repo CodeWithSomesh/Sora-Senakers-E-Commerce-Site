@@ -123,6 +123,23 @@ export const trackAdminAction = async (req: Request, res: Response) => {
     const ipAddress = req.ip || req.headers['x-forwarded-for'] as string || "unknown";
     const userAgent = req.headers['user-agent'] || "unknown";
 
+    // Determine severity based on action type
+    let severity = "low";
+    const criticalActions = [
+      "bulk_operation",
+      "data_export",
+      "security_settings_changed",
+      "user_deleted"
+    ];
+
+    if (criticalActions.includes(actionType)) {
+      severity = "critical";
+    } else if (actionType === "product_deleted" || actionType === "user_role_changed") {
+      severity = "high";
+    } else if (actionType === "product_edited" || actionType === "settings_modified") {
+      severity = "medium";
+    }
+
     // Create admin action record
     const adminAction = await AdminAction.create({
       adminId,
@@ -145,19 +162,22 @@ export const trackAdminAction = async (req: Request, res: Response) => {
       username: adminUsername,
       ipAddress,
       userAgent,
-      severity: "low",
+      severity,
       details: {
         actionType,
         targetType,
         targetId,
         targetName,
+        changes,
       },
       timestamp: new Date(),
+      resolved: false,
     });
 
     return res.status(201).json({
       message: "Admin action logged",
       actionId: adminAction._id,
+      severity,
     });
   } catch (error) {
     console.error("Track admin action error:", error);
@@ -426,5 +446,44 @@ export const syncAuth0Logs = async (req: Request, res: Response) => {
       message: "Failed to sync Auth0 logs",
       error: error.message
     });
+  }
+};
+
+/**
+ * 7. TRACK SUCCESSFUL LOGIN (FOR TESTING)
+ * This endpoint is for testing purposes to simulate successful logins
+ * In production, successful logins are tracked automatically in MyUserController
+ */
+export const trackSuccessfulLogin = async (req: Request, res: Response) => {
+  try {
+    const { userId, username } = req.body;
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] as string || "unknown";
+    const userAgent = req.headers['user-agent'] || "unknown";
+
+    // Create successful login log entry
+    await SecurityLog.create({
+      eventType: "successful_login",
+      userId: userId || "test_user_" + Math.random().toString(36).substring(7),
+      username,
+      ipAddress,
+      userAgent,
+      severity: "low",
+      details: {
+        loginMethod: "test",
+        timestamp: new Date(),
+      },
+      timestamp: new Date(),
+      resolved: false,
+    });
+
+    return res.status(201).json({
+      message: "Successful login logged",
+      userId,
+      username,
+      ipAddress,
+    });
+  } catch (error) {
+    console.error("Track successful login error:", error);
+    return res.status(500).json({ message: "Failed to track successful login" });
   }
 };

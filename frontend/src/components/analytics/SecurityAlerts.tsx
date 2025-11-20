@@ -1,5 +1,7 @@
 import { FailedLoginAttempt } from "../../types/security.types";
-import { AlertCircle, Clock, User, MapPin } from "lucide-react";
+import { AlertCircle, Clock, User, MapPin, Eye } from "lucide-react";
+import { useState } from "react";
+import { SecurityDetailsModal } from "./SecurityDetailsModal";
 
 /**
  * SECURITY ALERTS COMPONENT
@@ -8,12 +10,24 @@ import { AlertCircle, Clock, User, MapPin } from "lucide-react";
 
 interface SecurityAlertsProps {
   failedLogins: FailedLoginAttempt[];
+  onItemClick?: (login: FailedLoginAttempt) => void;
 }
 
-export const SecurityAlerts = ({ failedLogins }: SecurityAlertsProps) => {
+export const SecurityAlerts = ({ failedLogins, onItemClick }: SecurityAlertsProps) => {
+  const [selectedLogin, setSelectedLogin] = useState<FailedLoginAttempt | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
   const formatTimestamp = (timestamp: Date): string => {
     const date = new Date(timestamp);
     return date.toLocaleString();
+  };
+
+  const handleClick = (login: FailedLoginAttempt) => {
+    setSelectedLogin(login);
+    setShowModal(true);
+    if (onItemClick) {
+      onItemClick(login);
+    }
   };
 
   return (
@@ -38,10 +52,11 @@ export const SecurityAlerts = ({ failedLogins }: SecurityAlertsProps) => {
           failedLogins.map((login) => (
             <div
               key={login.id}
-              className={`p-4 rounded-lg border-l-4 ${
+              onClick={() => handleClick(login)}
+              className={`p-4 rounded-lg border-l-4 cursor-pointer transition-all hover:shadow-md ${
                 login.flagged
-                  ? "bg-red-50 border-red-500"
-                  : "bg-gray-50 border-gray-300"
+                  ? "bg-red-50 border-red-500 hover:bg-red-100"
+                  : "bg-gray-50 border-gray-300 hover:bg-gray-100"
               }`}
             >
               <div className="flex items-start justify-between">
@@ -72,11 +87,28 @@ export const SecurityAlerts = ({ failedLogins }: SecurityAlertsProps) => {
                     Reason: {login.reason.replace(/_/g, " ").toUpperCase()}
                   </p>
                 </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClick(login);
+                  }}
+                  className="ml-2 p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-full transition-colors"
+                  title="View Details"
+                >
+                  <Eye className="h-4 w-4" />
+                </button>
               </div>
             </div>
           ))
         )}
       </div>
+
+      <SecurityDetailsModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        data={selectedLogin}
+        type="failedLogin"
+      />
     </div>
   );
 };

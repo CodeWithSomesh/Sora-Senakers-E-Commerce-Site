@@ -1,5 +1,7 @@
 import { AdminAction } from "../../types/security.types";
-import { Shield, Clock, CheckCircle, AlertCircle, Edit, Trash2, Plus } from "lucide-react";
+import { Shield, Clock, CheckCircle, AlertCircle, Edit, Trash2, Plus, Eye } from "lucide-react";
+import { useState } from "react";
+import { SecurityDetailsModal } from "./SecurityDetailsModal";
 
 /**
  * ADMIN ACTIVITY LOG COMPONENT
@@ -8,9 +10,21 @@ import { Shield, Clock, CheckCircle, AlertCircle, Edit, Trash2, Plus } from "luc
 
 interface AdminActivityLogProps {
   adminActions: AdminAction[];
+  onItemClick?: (action: AdminAction) => void;
 }
 
-export const AdminActivityLog = ({ adminActions }: AdminActivityLogProps) => {
+export const AdminActivityLog = ({ adminActions, onItemClick }: AdminActivityLogProps) => {
+  const [selectedAction, setSelectedAction] = useState<AdminAction | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleClick = (action: AdminAction) => {
+    setSelectedAction(action);
+    setShowModal(true);
+    if (onItemClick) {
+      onItemClick(action);
+    }
+  };
+
   const getActionIcon = (actionType: string) => {
     if (actionType.includes("add")) return Plus;
     if (actionType.includes("edit")) return Edit;
@@ -66,7 +80,8 @@ export const AdminActivityLog = ({ adminActions }: AdminActivityLogProps) => {
             return (
               <div
                 key={action.id}
-                className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
+                onClick={() => handleClick(action)}
+                className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors border border-gray-100 cursor-pointer hover:shadow-md"
               >
                 <div className={`p-2 rounded-lg ${colorClass}`}>
                   <Icon className="h-4 w-4" />
@@ -92,11 +107,28 @@ export const AdminActivityLog = ({ adminActions }: AdminActivityLogProps) => {
                     {formatTimestamp(action.timestamp)}
                   </p>
                 </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClick(action);
+                  }}
+                  className="ml-2 p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-full transition-colors"
+                  title="View Details"
+                >
+                  <Eye className="h-4 w-4" />
+                </button>
               </div>
             );
           })
         )}
       </div>
+
+      <SecurityDetailsModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        data={selectedAction}
+        type="adminAction"
+      />
     </div>
   );
 };

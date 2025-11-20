@@ -6,6 +6,7 @@ import {
   getSecurityDashboard,
   resolveSecurityAlert,
   syncAuth0Logs,
+  trackSuccessfulLogin,
 } from "../controllers/SecurityAnalyticsController";
 import { jwtCheck, jwtParse } from "../middleware/auth";
 
@@ -13,6 +14,9 @@ const router = express.Router();
 
 // Track failed login attempt (public - no auth required)
 router.post("/failed-login", trackFailedLogin);
+
+// Track successful login (for testing purposes - public)
+router.post("/successful-login", trackSuccessfulLogin);
 
 // Track admin action (requires auth)
 router.post("/admin-action", jwtCheck, jwtParse, trackAdminAction);

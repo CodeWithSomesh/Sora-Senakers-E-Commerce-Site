@@ -1,0 +1,416 @@
+###############################################################################
+# SECURITY ANALYTICS TEST CASES
+# Use VS Code REST Client Extension to run these tests
+# Click "Send Request" above each test to execute
+###############################################################################
+
+### Variables (Update these as needed)
+@baseUrl = http://localhost:7000
+@token = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Im1nRzB6cDJsRk5oRXNFTGxHNHpwcSJ9.eyJpc3MiOiJodHRwczovL2Rldi1rbHBsOGo3aGdwY25vYXh0LnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJnb29nbGUtb2F1dGgyfDExNTc4NDUwMTIxODgwODk0MTQwNyIsImF1ZCI6WyJzbmVha2Vycy13ZWJzaXRlLWFwaSIsImh0dHBzOi8vZGV2LWtscGw4ajdoZ3Bjbm9heHQudXMuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTc2MzYyMDY5MywiZXhwIjoxNzYzNzA3MDkzLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIG9mZmxpbmVfYWNjZXNzIiwiYXpwIjoiUzJiZm5DZ2F2ZWJna0pqNmdvUjJiYlBqSEFnM0VEaFoifQ.tuLBAhWo6fKObBbJFNizbNFTcI7nqrJu2CBtGaKrZM_cB1GitK5v7GqUYF5hphnxniEPaWW5hmRgy6f5JRq-iuTpM2crq55k-KZE-UosPdlNX_Yfp8HLZ6fR8FY3HDXRix-4MuESrMy7F8Y-L8AfCIfXrm2-7H9gUbBSJxgEeT2iq9uZmMjos6khaSXfNeKu_hoWfbWgYTTFWKM_MoQkktPYbe-SnP4zDPdyYkbMzbPdPLRmbBs6HBKduPCsW024rw9o7Hm6j84znNtWPq6zaKWLkjPf36IzpnGcTVueAEaq7OlwyDAwHND2YHsGs-QLpUsdj9qDdfWAdF_-kb27Sg
+
+
+###############################################################################
+# DEBUGGING: Test if Backend is Running
+###############################################################################
+
+### Test 0.1: Check Backend Health
+# Expected: Should return 200 OK or dashboard data
+# If fails: Backend is not running - run "npm run dev" in backend folder
+GET {{baseUrl}}/api/security/dashboard
+Authorization: Bearer {{token}}
+
+### Test 0.2: Check Token (Optional)
+# If Test 2.1 fails, uncomment below to verify your token format
+# Your token should start with "eyJ" and be very long (500+ characters)
+# @token = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik...
+
+###############################################################################
+# TEST 1: FAILED LOGIN ATTEMPTS (Brute Force Detection)
+###############################################################################
+
+### Test 1.1: First Failed Login Attempt
+# Expected: attemptCount: 1, flagged: false
+POST {{baseUrl}}/api/security/failed-login
+Content-Type: application/json
+
+{
+  "username": "testuser@example.com",
+  "email": "testuser@example.com",
+  "reason": "invalid_credentials"
+}
+
+### Test 1.2: Second Failed Login Attempt
+# Expected: attemptCount: 2, flagged: false
+POST {{baseUrl}}/api/security/failed-login
+Content-Type: application/json
+
+{
+  "username": "testuser@example.com",
+  "email": "testuser@example.com",
+  "reason": "invalid_credentials"
+}
+
+### Test 1.3: Third Failed Login Attempt (TRIGGERS BLOCKING)
+# Expected: attemptCount: 3, flagged: true, accountBlocked: true
+POST {{baseUrl}}/api/security/failed-login
+Content-Type: application/json
+
+{
+  "username": "testuser@example.com",
+  "email": "testuser@example.com",
+  "reason": "invalid_credentials"
+}
+
+### Test 1.4: Multiple Failed Logins from Different Users (For Login Comparison)
+POST {{baseUrl}}/api/security/failed-login
+Content-Type: application/json
+
+{
+  "username": "user1@test.com",
+  "email": "user1@test.com",
+  "reason": "invalid_credentials"
+}
+
+###
+POST {{baseUrl}}/api/security/failed-login
+Content-Type: application/json
+
+{
+  "username": "user2@test.com",
+  "email": "user2@test.com",
+  "reason": "invalid_credentials"
+}
+
+###
+POST {{baseUrl}}/api/security/failed-login
+Content-Type: application/json
+
+{
+  "username": "user3@test.com",
+  "email": "user3@test.com",
+  "reason": "invalid_credentials"
+}
+
+###############################################################################
+# TEST 2: ADMIN ACTIONS (Requires Authentication)
+# IMPORTANT: Replace YOUR_JWT_TOKEN_HERE with your actual JWT token
+#
+# HOW TO GET TOKEN:
+# 1. Login to http://localhost:3000 as admin
+# 2. Press F12 → Application tab → Local Storage
+# 3. Find "@@auth0spajs@@..." key
+# 4. Copy the "access_token" value (starts with eyJ...)
+# 5. Paste it in @token at top of this file
+###############################################################################
+
+### Test 2.1: Track Product Deletion
+# NOTE: adminId must be a valid 24-character MongoDB ObjectId
+# Using placeholder ID - it will still log the action for testing
+POST {{baseUrl}}/api/security/admin-action
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "adminId": "000000000000000000000001",
+  "adminUsername": "admin@sorasneakers.com",
+  "actionType": "product_deleted",
+  "targetType": "product",
+  "targetId": "prod_12345",
+  "targetName": "Nike Air Max 2024"
+}
+
+### Test 2.2: Track Product Edit
+POST {{baseUrl}}/api/security/admin-action
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "adminId": "000000000000000000000001",
+  "adminUsername": "admin@sorasneakers.com",
+  "actionType": "product_edited",
+  "targetType": "product",
+  "targetId": "prod_67890",
+  "targetName": "Adidas UltraBoost",
+  "changes": {
+    "price": {
+      "old": 150,
+      "new": 120
+    }
+  }
+}
+
+### Test 2.3: Track Product Addition
+POST {{baseUrl}}/api/security/admin-action
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "adminId": "000000000000000000000001",
+  "adminUsername": "admin@sorasneakers.com",
+  "actionType": "product_added",
+  "targetType": "product",
+  "targetId": "prod_new123",
+  "targetName": "Puma Running Shoes"
+}
+
+### Test 2.4: Track User Role Change
+POST {{baseUrl}}/api/security/admin-action
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "adminId": "000000000000000000000001",
+  "adminUsername": "admin@sorasneakers.com",
+  "actionType": "user_role_changed",
+  "targetType": "user",
+  "targetId": "user_456",
+  "targetName": "manager@sorasneakers.com"
+}
+
+###############################################################################
+# TEST 3: SUSPICIOUS ACTIVITY DETECTION (Requires Authentication)
+###############################################################################
+
+### Test 3.1: High-Value Purchase from New Account (CRITICAL)
+POST {{baseUrl}}/api/security/suspicious-activity
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "high_value_purchase",
+  "userId": "user_new_123",
+  "username": "newuser@test.com",
+  "details": {
+    "purchaseAmount": 850,
+    "accountAge": 2,
+    "accountAgeUnit": "hours",
+    "productsPurchased": 5
+  }
+}
+
+### Test 3.2: Rapid Checkout Detection (HIGH)
+POST {{baseUrl}}/api/security/suspicious-activity
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "rapid_checkout",
+  "username": "suspicious@example.com",
+  "details": {
+    "checkoutInterval": 15,
+    "intervalUnit": "seconds",
+    "transactionCount": 3
+  }
+}
+
+### Test 3.3: Multiple Account Abuse
+POST {{baseUrl}}/api/security/suspicious-activity
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "multiple_accounts",
+  "username": "abuser@example.com",
+  "details": {
+    "accountsCreated": 5,
+    "timeFrame": "1 hour",
+    "sameIPAddress": "192.168.1.100"
+  }
+}
+
+### Test 3.4: Multiple Accounts Detection (CRITICAL)
+# This type triggers CRITICAL severity - will show in dashboard
+POST {{baseUrl}}/api/security/suspicious-activity
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "multiple_accounts",
+  "username": "suspicious_user@test.com",
+  "details": {
+    "accountCount": 5,
+    "sameIPAddress": "192.168.1.100",
+    "timePeriod": "last 2 hours",
+    "pattern": "Same user creating multiple accounts from same IP"
+  }
+}
+
+###############################################################################
+# TEST 4: SUSPICIOUS IP DETECTION (Multi-Account from Same IP)
+# This requires logging 3+ successful logins from SAME IP with DIFFERENT users
+###############################################################################
+
+### Test 4.1: Successful Login - User 1
+# Simulates user1@test.com logging in from 192.168.1.100
+POST {{baseUrl}}/api/security/successful-login
+Content-Type: application/json
+
+{
+  "userId": "user_001",
+  "username": "user1@test.com"
+}
+
+### Test 4.2: Successful Login - User 2
+# Simulates user2@test.com logging in from SAME IP (192.168.1.100)
+POST {{baseUrl}}/api/security/successful-login
+Content-Type: application/json
+
+{
+  "userId": "user_002",
+  "username": "user2@test.com"
+}
+
+### Test 4.3: Successful Login - User 3
+# Simulates user3@test.com logging in from SAME IP (192.168.1.100)
+# This will trigger the "Suspicious IP" detection (3+ users from same IP)
+POST {{baseUrl}}/api/security/successful-login
+Content-Type: application/json
+
+{
+  "userId": "user_003",
+  "username": "user3@test.com"
+}
+
+### Test 4.4: Successful Login - User 4
+# Adding more users to increase the severity
+POST {{baseUrl}}/api/security/successful-login
+Content-Type: application/json
+
+{
+  "userId": "user_004",
+  "username": "user4@test.com"
+}
+
+###############################################################################
+# TEST 5: ADMIN CRITICAL SCENARIOS
+# These demonstrate high-risk admin actions that should be closely monitored
+###############################################################################
+
+### Test 5.1: CRITICAL - Bulk User Deletion
+POST {{baseUrl}}/api/security/admin-action
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "adminId": "000000000000000000000001",
+  "adminUsername": "admin@sorasneakers.com",
+  "actionType": "bulk_operation",
+  "targetType": "user",
+  "targetId": "bulk_delete_001",
+  "targetName": "Bulk User Deletion",
+  "changes": {
+    "operation": "delete",
+    "affectedUsers": 150,
+    "reason": "Compliance cleanup"
+  }
+}
+
+### Test 5.2: CRITICAL - Data Export
+POST {{baseUrl}}/api/security/admin-action
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "adminId": "000000000000000000000001",
+  "adminUsername": "admin@sorasneakers.com",
+  "actionType": "data_export",
+  "targetType": "system",
+  "targetId": "export_001",
+  "targetName": "Customer Data Export",
+  "changes": {
+    "exportType": "customer_data",
+    "recordCount": 5000,
+    "includesPII": true,
+    "exportedFields": ["email", "phone", "address", "purchase_history"]
+  }
+}
+
+### Test 5.3: CRITICAL - Security Settings Changed
+POST {{baseUrl}}/api/security/admin-action
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "adminId": "000000000000000000000001",
+  "adminUsername": "admin@sorasneakers.com",
+  "actionType": "security_settings_changed",
+  "targetType": "system",
+  "targetId": "security_config_001",
+  "targetName": "Authentication Settings Modified",
+  "changes": {
+    "setting": "two_factor_authentication",
+    "old": "required",
+    "new": "optional",
+    "affectedUsers": "all"
+  }
+}
+
+### Test 5.4: CRITICAL - User Deleted
+POST {{baseUrl}}/api/security/admin-action
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "adminId": "000000000000000000000001",
+  "adminUsername": "admin@sorasneakers.com",
+  "actionType": "user_deleted",
+  "targetType": "user",
+  "targetId": "user_12345",
+  "targetName": "john.doe@example.com",
+  "changes": {
+    "reason": "Account violation",
+    "accountAge": "2 years",
+    "totalOrders": 45,
+    "lifetimeValue": 2350
+  }
+}
+
+###############################################################################
+# TEST 6: GET SECURITY DASHBOARD DATA
+###############################################################################
+
+### Test 6.1: Fetch Complete Security Dashboard
+# This retrieves all security metrics and events
+# After running Tests 1-5, this should show all populated data
+GET {{baseUrl}}/api/security/dashboard
+Authorization: Bearer {{token}}
+
+
+###############################################################################
+# INSTRUCTIONS TO GET JWT TOKEN
+###############################################################################
+
+# Method 1: From Browser (Easiest)
+# 1. Login to your app as admin
+# 2. Open DevTools (F12)
+# 3. Go to Application tab → Local Storage
+# 4. Find key containing "auth" or "token"
+# 5. Copy the token value
+# 6. Replace "YOUR_JWT_TOKEN_HERE" at the top of this file
+
+# Method 2: From Network Tab
+# 1. Login as admin
+# 2. Open DevTools → Network tab
+# 3. Look for any API request
+# 4. Check Request Headers → Authorization header
+# 5. Copy the token after "Bearer "
+
+# Method 3: Console
+# 1. Login as admin
+# 2. Open Console (F12)
+# 3. Type: localStorage
+# 4. Find the auth token
+# 5. Copy and paste above
+
+###############################################################################
+# QUICK TEST CHECKLIST
+###############################################################################
+
+# ✓ Test 1.1-1.3: Failed login detection (3 attempts)
+# ✓ Test 2.1-2.4: Admin actions tracking
+# ✓ Test 3.1-3.4: Suspicious activity detection
+# ✓ Test 4.1: Dashboard data retrieval
+# ✓ Test 6: Complete attack scenario
+
+# After running tests, verify in:
+# http://localhost:3000/admin/analytics (Security tab)
