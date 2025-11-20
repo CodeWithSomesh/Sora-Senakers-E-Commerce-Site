@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { User } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -31,7 +30,6 @@ type Props = {
 };
 
 const UserProfileForm = ({ onSave, isLoading, currentUser}: Props) => {
-    const { getAccessTokenSilently } = useAuth0();
     console.log(currentUser)
     /* imported the useForm from react-hook-form, 
     we telling that the type of our form is "UserFormData" which has all the fields */
@@ -140,14 +138,10 @@ const UserProfileForm = ({ onSave, isLoading, currentUser}: Props) => {
 
         try {
             const endpoint = checked ? "/api/mfa/enable" : "/api/mfa/disable";
-            const accessToken = await getAccessTokenSilently();
 
             const response = await fetch(`http://localhost:7000${endpoint}`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${accessToken}`
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userId: currentUser.auth0Id })
             });
 
