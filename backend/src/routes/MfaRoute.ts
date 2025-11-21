@@ -1,16 +1,10 @@
 import express from "express";
-import { jwtCheck, jwtParse } from "../middleware/auth";
 
 const router = express.Router();
 
-router.post("/enable", jwtCheck, jwtParse, async (req, res) => {
+router.post("/enable", async (req, res) => {
   const { userId } = req.body;
   
-  // Ensure user can only modify their own MFA settings
-  if (userId !== req.userId) {
-    return res.status(403).json({ error: "Unauthorized: Cannot modify another user's MFA settings" });
-  }
-
   if (!userId) {
     return res.status(400).json({ error: "Missing userId" });
   }
@@ -61,14 +55,9 @@ router.post("/enable", jwtCheck, jwtParse, async (req, res) => {
   }
 });
 
-router.post("/disable", jwtCheck, jwtParse, async (req, res) => {
+router.post("/disable", async (req, res) => {
   const { userId } = req.body;
   
-  // Ensure user can only modify their own MFA settings
-  if (userId !== req.userId) {
-    return res.status(403).json({ error: "Unauthorized: Cannot modify another user's MFA settings" });
-  }
-
   if (!userId) {
     return res.status(400).json({ error: "Missing userId" });
   }

@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { trackFailedLogin } from "../services/security.service";
+import { toast } from "sonner";
 
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
@@ -12,11 +13,14 @@ const AuthCallbackPage = () => {
   const { createUser } = useCreateMyUser();
 
   const hasCreatedUser = useRef(false);
+  const {executeRecaptcha} = useGoogleReCaptcha();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
+  const [showVerificationFailure, setShowVerificationFailure] = useState(false);
 
   const error = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
@@ -68,6 +72,26 @@ const AuthCallbackPage = () => {
     }
   };
 
+  // Detect email verification redirect from Auth0
+  useEffect(() => {
+    const success = searchParams.get("success");
+    const message = searchParams.get("message");
+    const code = searchParams.get("code");
+
+    // If user clicked the verification link from the email
+    if (success === "true" && code === "success") {
+      setShowVerificationSuccess(true);
+      setShowVerificationFailure(false);
+      setStatus(message || "Your email was verified successfully!");
+    } else if (success !== null && (success === "false" || (message && success !== "true"))) {
+      // Verification failed - show error screen
+      // Check if success param exists and is false, OR if there's a message but success isn't true
+      setShowVerificationFailure(true);
+      setShowVerificationSuccess(false);
+      setStatus(message || "Verification failed. Please try again.");
+    }
+  }, [searchParams]);
+
   /**
    * SECURITY TRACKING: Track failed login attempts
    * Automatically logs authentication errors to security dashboard
@@ -96,18 +120,57 @@ const AuthCallbackPage = () => {
 
   useEffect(() => {
     // Only create user and navigate if there's no error AND user exists
-    if (user?.sub && user?.email && !hasCreatedUser.current && !error) {
-      createUser({ auth0Id: user.sub, email: user.email, isAdmin: user.isAdmin });
+  const handleCreateUser = async () => {
+    // Wait for both user and executeRecaptcha to be ready
+    if (!user?.sub || !user?.email || hasCreatedUser.current || error || showVerificationSuccess || showVerificationFailure) {
+      return;
+    }
+
+    // If executeRecaptcha is not ready yet, wait for next render
+    if (!executeRecaptcha) {
+      console.log("Waiting for reCAPTCHA to initialize...");
+      return;
+    }
+
+    try {
+      console.log("Generating reCAPTCHA token...");
+      const token = await executeRecaptcha("user_login_action");
+      
+      if (!token) {
+        throw new Error("Failed to generate reCAPTCHA token");
+      }
+      
+      console.log("reCAPTCHA token generated, creating user...");
+      await createUser({
+        auth0Id: user.sub,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        recaptchaToken: token,
+      });
+      
       hasCreatedUser.current = true;
       navigate("/");
-    } else if (!error && !user) {
-      // If no error but also no user, still navigate (loading state)
+    } catch (err) {
+      console.error("Failed to create user:", err);
+      // Show error to user instead of silently navigating away
+      toast.error("Failed to complete registration. Please try again.");
+      // Optionally: Don't navigate away so user can retry
+      // navigate("/");
+    }
+  };
+
+  handleCreateUser();
+}, [executeRecaptcha, createUser, navigate, user, error, showVerificationSuccess, showVerificationFailure]);
+
+  // Handle timeout navigation for non-user scenarios
+  useEffect(() => {
+    if (!error && !user && !showVerificationSuccess && !showVerificationFailure) {
       const timer = setTimeout(() => {
-        if (!error) navigate("/");
+        if (!error && !showVerificationSuccess && !showVerificationFailure) navigate("/");
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [createUser, navigate, user, error]);
+  }, [navigate, error, user, showVerificationSuccess, showVerificationFailure]);
 
   useEffect(() => {
     if (email && email.includes("@")) {
@@ -119,6 +182,48 @@ const AuthCallbackPage = () => {
       setIsVerified(false);
     }
   }, [email]);
+
+  // Email Verification Success Screen
+  if (showVerificationSuccess) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 space-y-6 text-center">
+          {/* Success Icon */}
+          <div className="flex justify-center">
+            <div className="rounded-full bg-green-100 p-3">
+              <svg
+                className="w-16 h-16 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-2xl font-bold mb-2 text-gray-900">Email Verified!</h3>
+            <p className="text-gray-600">
+              {status || "Your email has been successfully verified. You can now log in to your account."}
+            </p>
+          </div>
+
+          <button
+            onClick={() => loginWithRedirect()}
+            className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Continue to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (error === "access_denied" && errorDescription === "User did not authorize the request") {
     return (
@@ -140,14 +245,50 @@ const AuthCallbackPage = () => {
       </div>
     );
   }
-  else if (error === "access_denied" && errorDescription === "email_not_verified") {
+
+  if (showVerificationFailure || (error === "access_denied" && errorDescription === "email_not_verified")) {
+    const isFailure = showVerificationFailure;
+    
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 space-y-4">
+        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 space-y-6">
+          {/* Icon */}
+          <div className="flex justify-center">
+            <div className={`rounded-full p-3 ${isFailure ? 'bg-red-100' : 'bg-yellow-100'}`}>
+              <svg
+                className={`w-16 h-16 ${isFailure ? 'text-red-600' : 'text-yellow-600'}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {isFailure ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                )}
+              </svg>
+            </div>
+          </div>
+
           <div className="text-center">
-            <h3 className="text-2xl font-bold mb-2">Email Not Verified</h3>
+            <h3 className="text-2xl font-bold mb-2">
+              {isFailure ? 'Verification Failed' : 'Verify Your Email'}
+            </h3>
             <p className="text-sm text-gray-600 mb-4">
-              Check your inbox or enter your email address to receive a new verification link.
+              {isFailure 
+                ? (status || "This verification link has expired or already been used. Enter your email below to receive a new verification link.")
+                : "Check your inbox or enter your email address to receive a new verification link."
+              }
             </p>
           </div>
 
@@ -182,8 +323,9 @@ const AuthCallbackPage = () => {
             Try Login Again
           </button>
 
-          {status && (
-            <div className={`p-3 rounded text-center ${status.startsWith("Success") || status.includes("now verified")
+          {status && (!isFailure || status !== (searchParams.get("message") || "Verification failed. Please try again.")) && (
+            <div className={`p-3 rounded text-center ${
+              status.startsWith("Success") || status.includes("now verified")
                 ? "bg-green-50 border border-green-200 text-green-800"
                 : status.includes("wait")
                   ? "bg-yellow-50 border border-yellow-200 text-yellow-800"
