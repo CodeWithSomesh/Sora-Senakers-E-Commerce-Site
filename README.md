@@ -9,6 +9,7 @@
 [![Auth0](https://img.shields.io/badge/Auth0-EB5424?style=flat-square&logo=auth0&logoColor=white)](https://auth0.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 
+**Link: https://sora-senakers-e-commerce-site.vercel.app/**
 </div>
 
 ---
