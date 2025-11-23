@@ -8,7 +8,14 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Auth0](https://img.shields.io/badge/Auth0-EB5424?style=flat-square&logo=auth0&logoColor=white)](https://auth0.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+
 </div>
+
+---
+
+## 🌐 Live Demo
+
+🔗 **Deployed Application:** https://sora-senakers-e-commerce-site.vercel.app/
 
 ---
 
@@ -16,7 +23,6 @@
 
 Sora Sneakers is a full-stack e-commerce application built with the MERN stack, featuring enterprise-grade authentication, comprehensive security monitoring, and an intuitive shopping experience. The platform supports multi-role user management, real-time analytics, and automated security measures.
 
-Link: https://sora-senakers-e-commerce-site.vercel.app/
 ---
 
 ## 🛠️ Tech Stack
@@ -252,4 +258,7 @@ This project is for educational purposes.
 <div align="center">
 
 **Built with ❤️ by the Sora Sneakers Team**
+
+[Report Bug](https://github.com/CodeWithSomesh/Sora-Sneakers-E-Commerce-Site/issues) · [Request Feature](https://github.com/CodeWithSomesh/Sora-Sneakers-E-Commerce-Site/issues)
+
 </div>
