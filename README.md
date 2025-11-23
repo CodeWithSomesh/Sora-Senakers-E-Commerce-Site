@@ -252,7 +252,4 @@ This project is for educational purposes.
 <div align="center">
 
 **Built with ❤️ by the Sora Sneakers Team**
-
-[Report Bug](https://github.com/CodeWithSomesh/Sora-Sneakers-E-Commerce-Site/issues) · [Request Feature](https://github.com/CodeWithSomesh/Sora-Sneakers-E-Commerce-Site/issues)
-
 </div>
